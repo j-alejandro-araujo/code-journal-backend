@@ -32,12 +32,9 @@ app.post('/api/entries', async (req, res) => {
   try {
     const { title, photoUrl, notes } = req.body;
     if (!title || !photoUrl || !notes) {
-      res
-        .status(400)
-        .json({
-          error:
-            'Invalid information, requires: Title[title], photoUrl[photoUrl], and Notes[notes].',
-        });
+      res.status(400).json({
+        error: 'Invalid information, requires: Title, photoUrl, and Notes.',
+      });
     }
     const sql = `
     INSERT INTO "entries" ("title", "photoUrl", "notes")
@@ -86,6 +83,35 @@ app.put('/api/entries/:entryId', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'An unexpected error has occurred.' });
+  }
+});
+
+// DELETING ENTRY FROM DATABASE
+app.delete('/api/entries/:entryId', async (req, res) => {
+  try {
+    const { entryId } = req.params;
+    if (!Number.isInteger(Number(entryId))) {
+      res.status(400).json({ error: 'Invalid entryId' });
+      return;
+    }
+    const sql = `
+    DELETE FROM "entries"
+    WHERE "entryId" = $1
+    RETURNING *
+    `;
+
+    const deleteParams = [entryId];
+    const deleteResult = await db.query(sql, deleteParams);
+
+    if (deleteResult.rows[0] === undefined) {
+      res.status(404).json({ error: `EntryId ${entryId} not found.` });
+      return;
+    }
+
+    res.status(204).end();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An unexpected error has occured.' });
   }
 });
 
