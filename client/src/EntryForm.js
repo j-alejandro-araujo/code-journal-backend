@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { addEntry, removeEntry, updateEntry } from './data';
+import { useCRUD } from './data';
 
 /**
  * Form that adds or edits an entry.
@@ -11,20 +11,21 @@ export default function EntryForm({ entry, onSubmit }) {
   const [photoUrl, setPhotoUrl] = useState(entry?.photoUrl ?? '');
   const [notes, setNotes] = useState(entry?.notes ?? '');
   const [isDeleting, setIsDeleting] = useState(false);
+  const crud = useCRUD();
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const newEntry = { title, photoUrl, notes };
     if (entry) {
-      updateEntry({ ...entry, ...newEntry });
+      await crud.updateEntry(entry.entryId, newEntry);
     } else {
-      addEntry(newEntry);
+      await crud.addEntry(newEntry);
     }
     onSubmit();
   }
 
-  function handleDelete() {
-    removeEntry(entry.entryId);
+  async function handleDelete() {
+    await crud.deleteEntry(entry.entryId);
     onSubmit();
   }
 

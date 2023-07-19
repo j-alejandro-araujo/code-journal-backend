@@ -2,6 +2,7 @@ import { useState } from 'react';
 import EntryForm from './EntryForm';
 import EntryList from './EntryList';
 import { NavBar } from './NavBar';
+import { useCRUD } from './data';
 import './App.css';
 
 export default function App() {
@@ -11,6 +12,7 @@ export default function App() {
    * defined - the entry being edited
    */
   const [editing, setEditing] = useState();
+  const crud = useCRUD();
 
   return (
     <>
@@ -22,6 +24,9 @@ export default function App() {
         <EntryList
           onCreate={() => setEditing(null)}
           onEdit={(entry) => setEditing(entry)}
+          entries={crud.entries}
+          loading={crud.loading}
+          error={crud.error}
         />
       )}
     </>
