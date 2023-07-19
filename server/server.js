@@ -21,6 +21,8 @@ app.get('/api/entries', async (req, res) => {
     FROM "entries"
     `;
     const response = await db.query(sql);
+    const allEntries = response.rows;
+    res.json(allEntries);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'An unexpected error has occurred.' });
@@ -73,12 +75,12 @@ app.put('/api/entries/:entryId', async (req, res) => {
     const updatedParams = [title, photoUrl, notes, entryId];
     const updateResult = await db.query(sql, updatedParams);
 
-    if (updatedParams.rows[0] === undefined) {
+    if (updateResult.rows[0] === undefined) {
       res.status(404).json({ error: `EntryId ${entryId} not found.` });
       return;
     }
 
-    const updatedEntry = updateResult.row[0];
+    const updatedEntry = updateResult.rows[0];
     res.status(200).json(updatedEntry);
   } catch (error) {
     console.error(error);

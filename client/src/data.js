@@ -1,37 +1,19 @@
-let data = {
-  entries: [],
-  nextEntryId: 1,
-};
+// import {useState, useEffect} from 'react';
 
-window.addEventListener('beforeunload', function (event) {
-  const dataJSON = JSON.stringify(data);
-  localStorage.setItem('code-journal-data', dataJSON);
-});
+// export function useHandleCrud () {
+//   const [entries, setEntries] = useState([])
 
-const localData = JSON.parse(localStorage.getItem('code-journal-data'));
-if (localData) {
-  data = localData;
-}
+//   const fetchEntries = async() => {
+//     try {
+//       const res = await fetch('http://localhost:8080/api/entries')
+//       if (!res.ok) {
+//         throw new Error('Failed to fetch entries form server.')
+//       }
+//       setEntries(res.json())
+//     } catch (error) {
+//       console.error(error)
+//       return[]
+//     }
+//   }
 
-export function readEntries() {
-  return data.entries;
-}
-
-export function addEntry(entry) {
-  entry.entryId = data.nextEntryId++;
-  data.entries.unshift(entry);
-}
-
-export function updateEntry(entry) {
-  const newEntries = data.entries.map((e) =>
-    e.entryId === entry.entryId ? entry : e
-  );
-  data.entries = newEntries;
-}
-
-export function removeEntry(entryId) {
-  const updatedArray = data.entries.filter(
-    (entry) => entry.entryId !== entryId
-  );
-  data.entries = updatedArray;
-}
+// }
