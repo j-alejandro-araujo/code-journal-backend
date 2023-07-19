@@ -2,9 +2,22 @@ import { useState, useEffect } from 'react';
 
 export function useCRUD() {
   const [entries, setEntries] = useState([]);
-  const [editingEntry, setEditingEntry] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const data = await readEntries();
+        setEntries(data);
+        setLoading(false);
+      } catch (error) {
+        setError(error);
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
 
   const readEntries = async () => {
     try {
@@ -12,11 +25,9 @@ export function useCRUD() {
       if (!res.ok) {
         throw new Error('Failed to fetch entries from server.');
       }
-      const data = await res.json();
-      setEntries(data);
+      return await res.json();
     } catch (error) {
       setError(error);
-      setLoading(false);
     }
   };
 
@@ -47,7 +58,6 @@ export function useCRUD() {
       }
 
       const updatedEntry = {
-        ...entryToUpdate,
         ...updatedData,
       };
 

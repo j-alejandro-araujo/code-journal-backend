@@ -1,7 +1,17 @@
-import { readEntries } from './data';
+import { useCRUD } from './data';
 
 export default function EntryList({ onCreate, onEdit }) {
-  const entries = readEntries();
+  const crud = useCRUD();
+  const { entries, loading, error } = crud;
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error {error.message}</div>;
+  }
+
   return (
     <div className="container">
       <div className="row">
@@ -31,6 +41,7 @@ export default function EntryList({ onCreate, onEdit }) {
 }
 
 function Entry({ entry, onEdit }) {
+  const crud = useCRUD();
   return (
     <li>
       <div className="row">
@@ -47,7 +58,7 @@ function Entry({ entry, onEdit }) {
               <h3>{entry.title}</h3>
               <i
                 className="fa-solid fa-pencil"
-                onClick={() => onEdit(entry)}></i>
+                onClick={crud.updateEntry(entry.entryId, entry)}></i>
             </div>
           </div>
           <p>{entry.notes}</p>
