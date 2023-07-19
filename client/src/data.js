@@ -1,19 +1,106 @@
-// import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 
-// export function useHandleCrud () {
-//   const [entries, setEntries] = useState([])
+export function useCRUD() {
+  const [entries, setEntries] = useState([]);
+  const [editingEntry, setEditingEntry] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-//   const fetchEntries = async() => {
-//     try {
-//       const res = await fetch('http://localhost:8080/api/entries')
-//       if (!res.ok) {
-//         throw new Error('Failed to fetch entries form server.')
-//       }
-//       setEntries(res.json())
-//     } catch (error) {
-//       console.error(error)
-//       return[]
-//     }
-//   }
+  const readEntries = async () => {
+    try {
+      const res = await fetch('/api/entries');
+      if (!res.ok) {
+        throw new Error('Failed to fetch entries from server.');
+      }
+      const data = await res.json();
+      setEntries(data);
+    } catch (error) {
+      setError(error);
+      setLoading(false);
+    }
+  };
 
-// }
+  const addEntry = async (entry) => {
+    try {
+      const res = await fetch('/api/entries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(entry),
+      });
+      if (!res.ok) {
+        throw new Error('Failed to add entry to the server.');
+      }
+      const newEntry = await res.json();
+      setEntries((prevEntries) => [newEntry, ...prevEntries]);
+    } catch (error) {
+      setError(error);
+    }
+  };
+
+  const updateEntry = async (entryId, updatedData) => {
+    try {
+      const entryToUpdate = entries.find((entry) => entry.entryId === entryId);
+      if (!entryToUpdate) {
+        throw new Error(`Entry ID with ${entryId} not found.`);
+      }
+
+      const updatedEntry = {
+        ...entryToUpdate,
+        ...updatedData,
+      };
+
+      const res = await fetch(`/api/entries/${entryId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedEntry),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed tonupdate entry on the server.');
+      }
+
+      setEntries((prevEntries) =>
+        prevEntries.map((entry) =>
+          entry.entryId === entryId ? updatedEntry : entry
+        )
+      );
+    } catch (error) {
+      setError(error);
+    }
+  };
+
+  const deleteEntry = async (entryId) => {
+    try {
+      const entryToDelete = entries.find((entry) => entry.entryId === entryId);
+      if (!entryToDelete) {
+        throw new Error(`Entry ID with ${entryId} not found.`);
+      }
+
+      const res = await fetch(`/api/entries/${entryId}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        throw new Error('Failed to delete the entry from the server.');
+      }
+      setEntries((prevEntries) =>
+        prevEntries.filter((entry) => entry.entryId !== entryId)
+      );
+    } catch (error) {
+      setError(error);
+    }
+  };
+
+  return {
+    entries,
+    loading,
+    error,
+    readEntries,
+    addEntry,
+    updateEntry,
+    deleteEntry,
+  };
+}
